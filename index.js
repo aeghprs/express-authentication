@@ -19,18 +19,30 @@ app.use((req, res, next) => {
     next();
 });
 
+const rateLimit = require("express-rate-limit");
+const limiter = rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 50,
+    message: "Too many requests from this address, Please try again after 5 mins."
+});
+
+app.use(limiter);
+
 const helloRouter = require("./routes/hello");
 app.use("/", helloRouter);
+
+const registerRouter = require("./routes/auth");
+app.use("/", registerRouter);
 
 //eslint-disable-next-line max-len
 const dbURI = `mongodb+srv://${process.env.MONGODBUSERNAME}:${process.env.MONGODBPASSWORD}@cluster0.b9cgb.mongodb.net/${process.env.MONGODBDBNAME}?retryWrites=true&w=majority`;
 
-mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(dbURI)
     .then(() => {
         app.listen(port || 3000);
     })
     .catch((err) => {
         //eslint-disable-next-line no-console
-        console.log(err);
+        console.log(err.message);
     });
 
