@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
 
 require("dotenv").config();
 const port = process.env.PORT;
@@ -25,17 +27,17 @@ const limiter = rateLimit({
     max: 50,
     message: "Too many requests from this address, Please try again after 5 mins."
 });
-
 app.use(limiter);
 
-const helloRouter = require("./routes/hello");
-app.use("/", helloRouter);
 
 const registerRouter = require("./routes/auth");
 app.use("/", registerRouter);
 
-//eslint-disable-next-line max-len
-const dbURI = `mongodb+srv://${process.env.MONGODBUSERNAME}:${process.env.MONGODBPASSWORD}@cluster0.b9cgb.mongodb.net/${process.env.MONGODBDBNAME}?retryWrites=true&w=majority`;
+const helloRouter = require("./routes/hello");
+app.use("/", helloRouter);
+
+const dbURI = `mongodb+srv://${process.env.MONGODBUSERNAME}:
+${process.env.MONGODBPASSWORD}@cluster0.b9cgb.mongodb.net/${process.env.MONGODBDBNAME}?retryWrites=true&w=majority`;
 
 mongoose.connect(dbURI)
     .then(() => {

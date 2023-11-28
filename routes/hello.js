@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
-router.route("/").get((req, res) => {
-    res.send("<h2>Hello from the other side</h2>");
-});
+const helloController = require("../controllers/helloController");
+const verifyJWT = require("../utils/tokenHandler");
+
+router.get("/hello", verifyJWT, helloController.sendHelloResponse);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const User = require("../models/UserSchema");
 
 const handleNewUser = async (req, res) => {
@@ -49,11 +50,26 @@ const handleUserLogin = async (req, res) => {
     const matchPassword = await bcrypt.compare(password, foundUser.hashedPassword);
 
     if (matchPassword) {
+        const accessToken = jwt.sign(
+            { "email": foundUser.email },
+            process.env.ACCESS_TOKEN,
+            { expiresIn: "1d" }
+        );
+        // const refreshToken = jwt.sign(
+        //     { "email": foundUser.email },
+        //     process.env.REFRESH_TOKEN,
+        //     { expiresIn: "1d" }
+        // );
+
+        res.cookie("jwtSecretToken", accessToken,
+            { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 });
+
         res.status(200).json({
             "success": true,
-            "message": "User found",
+            "message": "Login successful",
             "userName": foundUser.userName,
-            "email": foundUser.email
+            "email": foundUser.email,
+            "accessToken": accessToken
         });
     } else {
         res.status(401).json({
